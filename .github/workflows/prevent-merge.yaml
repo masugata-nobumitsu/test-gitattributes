@@ -16,7 +16,9 @@ jobs:
     - name: Check for webpack.ignore changes
       id: check_changes
       run: |
-        if git diff --name-only HEAD^..HEAD | grep "webpack.ignore"; then
+        git fetch origin master
+        CHANGED_FILES=$(git diff --name-only master...HEAD)
+        if echo "$CHANGED_FILES" | grep "webpack.ignore"; then
           echo "::set-output name=changed::true"
         else
           echo "::set-output name=changed::false"
@@ -25,10 +27,11 @@ jobs:
     - name: Prevent merge if webpack.ignore changed
       if: steps.check_changes.outputs.changed == 'true'
       run: |
-        git diff --name-only HEAD^..HEAD | grep -v "webpack.ignore" > files_to_merge.txt
-        git checkout HEAD^
-        git checkout -b prevent-branch
-        xargs -a files_to_merge.txt git checkout prevent-branch --
+        git fetch origin master
+        CHANGED_FILES=$(git diff --name-only master...HEAD | grep -v "webpack.ignore")
+        git checkout master
+        git checkout -b temp-branch
+        xargs -a <(echo "$CHANGED_FILES") git checkout temp-branch --
         git commit -m "Exclude webpack.ignore from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
-        git push origin prevent-branch
-        echo "::set-output name=branch::prevent-branch"
+        git push origin temp-branch
+        echo "::set-output name=branch::temp-branch"
