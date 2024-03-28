@@ -25,6 +25,7 @@ jobs:
         CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA | grep -v "webpack.ignore" || true)
         if [ -n "$CHANGED_FILES" ]; then
           echo "changed=true" >> $GITHUB_ENV
+          echo "$CHANGED_FILES" > changed_files.txt
         else
           echo "changed=false" >> $GITHUB_ENV
         fi
@@ -32,11 +33,13 @@ jobs:
     - name: Prevent merge if webpack.ignore changed
       if: env.changed == 'true'
       run: |
-        git fetch origin
-        CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA | grep -v "webpack.ignore" || true)
-        git checkout master
-        git checkout -b temp-branch
-        xargs -I {} git checkout temp-branch -- "{}"
-        git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
-        git push origin temp-branch
-        echo "branch=temp-branch" >> $GITHUB_ENV
+        CHANGED_FILES=$(cat changed_files.txt)
+        if [ -n "$CHANGED_FILES" ]; then
+          git checkout master
+          git checkout -b temp-branch
+          xargs -I {} git checkout temp-branch -- "{}"
+          git add $CHANGED_FILES
+          git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
+          git push origin temp-branch
+          echo "branch=temp-branch" >> $GITHUB_ENV
+        fi
