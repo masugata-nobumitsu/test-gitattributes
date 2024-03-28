@@ -37,7 +37,6 @@ jobs:
         if [ -n "$CHANGED_FILES" ]; then
           git checkout master
           git checkout -b temp-branch
-          xargs -I {} git checkout temp-branch -- "{}"
           git add $CHANGED_FILES
           git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
           git push origin temp-branch
