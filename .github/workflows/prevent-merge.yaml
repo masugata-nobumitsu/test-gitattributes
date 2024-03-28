@@ -40,7 +40,7 @@ jobs:
           for file in $CHANGED_FILES; do
             git checkout temp-branch -- "$file"
           done
-          git add $CHANGED_FILES
+          git add .
           git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
           git push origin temp-branch
           echo "branch=temp-branch" >> $GITHUB_ENV
