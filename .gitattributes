@@ -1,1 +1,5 @@
-.ignore.file merge=ours
+# webpack.ignore を master ブランチでのみマージしない
+webpack.ignore merge=ours
+
+# その他のファイルやディレクトリに対するデフォルトの設定
+* -merge
