@@ -6,18 +6,18 @@ on:
       - master
 
 jobs:
-  prevent-webpack-ignore-merge:
+  prevent-specific-file-merge:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
       
     - name: Check for webpack.ignore changes
       id: check_changes
       run: |
         git fetch origin master
-        CHANGED_FILES=$(git diff --name-only master...$GITHUB_SHA)
+        CHANGED_FILES=$(git diff --name-only master $GITHUB_SHA)
         if echo "$CHANGED_FILES" | grep "webpack.ignore"; then
           echo "::set-output name=changed::true"
         else
@@ -28,10 +28,10 @@ jobs:
       if: steps.check_changes.outputs.changed == 'true'
       run: |
         git fetch origin master
-        CHANGED_FILES=$(git diff --name-only master...$GITHUB_SHA | grep -v "webpack.ignore")
+        CHANGED_FILES=$(git diff --name-only master $GITHUB_SHA | grep -v "webpack.ignore")
         git checkout master
         git checkout -b temp-branch
-        xargs -a <(echo "$CHANGED_FILES") git checkout temp-branch --
+        xargs -I {} git checkout temp-branch -- "{}"
         git commit -m "Exclude webpack.ignore from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
         git push origin temp-branch
         echo "::set-output name=branch::temp-branch"
