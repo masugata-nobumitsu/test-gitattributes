@@ -13,25 +13,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       
-    - name: Check for specific_file.txt changes
+    - name: Check for webpack.ignore changes
       id: check_changes
       run: |
         git fetch origin master
         CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA)
-        if echo "$CHANGED_FILES" | grep "specific_file.txt"; then
-          echo "::set-output name=changed::true"
+        if echo "$CHANGED_FILES" | grep "webpack.ignore"; then
+          echo "changed=true" >> $GITHUB_ENV
         else
-          echo "::set-output name=changed::false"
+          echo "changed=false" >> $GITHUB_ENV
         fi
 
-    - name: Prevent merge if specific_file.txt changed
-      if: steps.check_changes.outputs.changed == 'true'
+    - name: Prevent merge if webpack.ignore changed
+      if: env.changed == 'true'
       run: |
         git fetch origin master
-        CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA | grep -v "specific_file.txt")
+        CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA | grep -v "webpack.ignore")
         git checkout master
         git checkout -b temp-branch
         xargs -I {} git checkout temp-branch -- "{}"
-        git commit -m "Exclude specific_file.txt from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
+        git commit -m "Exclude webpack.ignore from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
         git push origin temp-branch
-        echo "::set-output name=branch::temp-branch"
+        echo "branch=temp-branch" >> $GITHUB_ENV
