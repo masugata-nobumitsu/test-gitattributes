@@ -1,4 +1,4 @@
-name: Prevent webpack.ignore Changes on Merge
+name: Prevent Specific File Changes on Merge
 
 on:
   pull_request:
@@ -13,25 +13,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       
-    - name: Check for webpack.ignore changes
+    - name: Check for specific_file.txt changes
       id: check_changes
       run: |
         git fetch origin master
-        CHANGED_FILES=$(git diff --name-only master $GITHUB_SHA)
-        if echo "$CHANGED_FILES" | grep "webpack.ignore"; then
+        CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA)
+        if echo "$CHANGED_FILES" | grep "specific_file.txt"; then
           echo "::set-output name=changed::true"
         else
           echo "::set-output name=changed::false"
         fi
 
-    - name: Prevent merge if webpack.ignore changed
+    - name: Prevent merge if specific_file.txt changed
       if: steps.check_changes.outputs.changed == 'true'
       run: |
         git fetch origin master
-        CHANGED_FILES=$(git diff --name-only master $GITHUB_SHA | grep -v "webpack.ignore")
+        CHANGED_FILES=$(git diff --name-only origin/master $GITHUB_SHA | grep -v "specific_file.txt")
         git checkout master
         git checkout -b temp-branch
         xargs -I {} git checkout temp-branch -- "{}"
-        git commit -m "Exclude webpack.ignore from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
+        git commit -m "Exclude specific_file.txt from merge" --author="$GITHUB_ACTOR <$GITHUB_ACTOR@users.noreply.github.com>"
         git push origin temp-branch
         echo "::set-output name=branch::temp-branch"
