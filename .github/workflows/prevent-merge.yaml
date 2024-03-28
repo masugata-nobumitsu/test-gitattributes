@@ -15,8 +15,8 @@ jobs:
       
     - name: Set up Git
       run: |
-        git config --global user.email "${{ github.event.pull_request.user.login }}@users.noreply.github.com"
-        git config --global user.name "${{ github.event.pull_request.user.login }}"
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git config --global user.name "${GITHUB_ACTOR}"
 
     - name: Check for webpack.ignore changes
       id: check_changes
@@ -37,6 +37,6 @@ jobs:
         git checkout master
         git checkout -b temp-branch
         xargs -I {} git checkout temp-branch -- "{}"
-        git commit -m "Exclude webpack.ignore from merge" --author="${{ github.event.pull_request.user.login }} <${{ github.event.pull_request.user.login }}@users.noreply.github.com>"
+        git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
         git push origin temp-branch
         echo "branch=temp-branch" >> $GITHUB_ENV
