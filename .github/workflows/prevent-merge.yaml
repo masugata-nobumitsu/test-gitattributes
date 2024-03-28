@@ -45,6 +45,6 @@ jobs:
           done
           git add .
           git commit -m "Exclude webpack.ignore from merge" --author="${GITHUB_ACTOR} <${GITHUB_ACTOR}@users.noreply.github.com>"
-          git push https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com.masugata-nobumitsu/test-gitattributes.git temp-branch
+          git push https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/masugata-nobumitsu/test-gitattributes.git temp-branch
           echo "branch=temp-branch" >> $GITHUB_ENV
         fi
